@@ -1,4 +1,4 @@
-import {Component,useState,useEffect,useCallback} from 'react';
+import {Component,useState,useEffect,useCallback,useMemo} from 'react';
 import {Container} from 'react-bootstrap';
 import './App.css';
 
@@ -6,6 +6,11 @@ const calcValue=()=>{
     console.log('random');
 
     return Math.floor(Math.random() * (50-1)+1);
+}
+
+const countTotal=(num)=>{
+    console.log('counting...');
+    return num+10;
 }
 
 const Slider= (props) => {
@@ -36,6 +41,9 @@ const Slider= (props) => {
              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzYGCzee47v4L_ajZISH1Ah2eqoVKtxU6YiAzF4pmvtm4zHuyhG0A70r3wWu2sgY4u790&usqp=CAU'    
             ]}, []) 
             // мемоизир ф-ия
+            // может быть пересоздана, когда деств-но нужно(при обновлении слайдов)
+            
+
 
     function logging(){
         console.log('log!')
@@ -51,6 +59,7 @@ const Slider= (props) => {
             window.removeEventListener('click',logging);
         }
     }, [slide]);
+    
     useEffect(()=>{
         console.log('autoplay changed')
     }, [autoplay])
@@ -65,23 +74,38 @@ const Slider= (props) => {
         setAutoplay(autoplay=> !autoplay)
     }
 
+    // мемоизрованная переменная
+    const total=useMemo(()=>
+    countTotal(slide),[slide]);
+
+    const style=useMemo(()=>({
+        color: slide>16 ? 'red' : 'black'
+        }),[slide]
+    )
+
+
+
+    useEffect(()=>{
+        console.log('style changed')
+    },[style]); // сравнивает новую ссылку на объект с предыд
+
     return (
         <Container>
             <div className="slider w-50 m-auto">
                 <img className="d-block w-100" src="https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg" alt="slide" />
-                    {/* {
-                        getSomeImages().map((url,i)=>{
-                            return(
-                                <img key={i} className='d-block w-100' src={url} alt='slide'></img>
-                            )
-                        })
-                    } */}
+
                     <Slide getSomeImages={getSomeImages}/>
 
-                <div className="text-center mt-5">Active slide {slide} <br/> 
+                <div style={style} className="text-center mt-5">Active slide {slide} <br/> 
                 {autoplay ? 'auto' : null}  
                 {/* строка режима включения */}
                 </div>
+
+                <div className="text-center mt-5">Total slides: {total}<br/> 
+                {autoplay ? 'auto' : null}  
+                {/* строка режима включения */}
+                </div>
+
                 <div className="buttons mt-3">
                     <button 
                         className="btn btn-primary me-2"
